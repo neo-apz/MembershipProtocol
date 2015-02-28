@@ -1,0 +1,5 @@
+*.o
+Application
+dbg.log
+msgcount.log
+stats.log
