@@ -6,10 +6,53 @@
 	objectVersion = 46;
 	objects = {
 
+/* Begin PBXFileReference section */
+		B5B071AD1AA1E1500060B641 /* Application.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Application.cpp; sourceTree = "<group>"; };
+		B5B071AE1AA1E1500060B641 /* Application.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Application.h; sourceTree = "<group>"; };
+		B5B071AF1AA1E1500060B641 /* EmulNet.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = EmulNet.cpp; sourceTree = "<group>"; };
+		B5B071B01AA1E1500060B641 /* EmulNet.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = EmulNet.h; sourceTree = "<group>"; };
+		B5B071B11AA1E1500060B641 /* Grader.sh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.sh; path = Grader.sh; sourceTree = "<group>"; };
+		B5B071B21AA1E1500060B641 /* Log.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Log.cpp; sourceTree = "<group>"; };
+		B5B071B31AA1E1500060B641 /* Log.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Log.h; sourceTree = "<group>"; };
+		B5B071B41AA1E1500060B641 /* Makefile */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.make; path = Makefile; sourceTree = "<group>"; };
+		B5B071B51AA1E1500060B641 /* Member.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Member.cpp; sourceTree = "<group>"; };
+		B5B071B61AA1E1500060B641 /* Member.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Member.h; sourceTree = "<group>"; };
+		B5B071B71AA1E1500060B641 /* mp1_specifications.pdf */ = {isa = PBXFileReference; lastKnownFileType = image.pdf; path = mp1_specifications.pdf; sourceTree = "<group>"; };
+		B5B071B81AA1E1500060B641 /* MP1Node.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = MP1Node.cpp; sourceTree = "<group>"; };
+		B5B071B91AA1E1500060B641 /* MP1Node.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MP1Node.h; sourceTree = "<group>"; };
+		B5B071BA1AA1E1500060B641 /* Params.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Params.cpp; sourceTree = "<group>"; };
+		B5B071BB1AA1E1500060B641 /* Params.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Params.h; sourceTree = "<group>"; };
+		B5B071BC1AA1E1500060B641 /* Queue.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Queue.h; sourceTree = "<group>"; };
+		B5B071BD1AA1E1500060B641 /* run.sh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.sh; path = run.sh; sourceTree = "<group>"; };
+		B5B071BE1AA1E1500060B641 /* stdincludes.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = stdincludes.h; sourceTree = "<group>"; };
+		B5B071BF1AA1E1500060B641 /* submit.py */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.python; path = submit.py; sourceTree = "<group>"; };
+		B5B071C01AA1E1500060B641 /* testcases */ = {isa = PBXFileReference; lastKnownFileType = folder; path = testcases; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
 /* Begin PBXGroup section */
 		B5B071A21AA1E1080060B641 = {
 			isa = PBXGroup;
 			children = (
+				B5B071AD1AA1E1500060B641 /* Application.cpp */,
+				B5B071AE1AA1E1500060B641 /* Application.h */,
+				B5B071AF1AA1E1500060B641 /* EmulNet.cpp */,
+				B5B071B01AA1E1500060B641 /* EmulNet.h */,
+				B5B071B11AA1E1500060B641 /* Grader.sh */,
+				B5B071B21AA1E1500060B641 /* Log.cpp */,
+				B5B071B31AA1E1500060B641 /* Log.h */,
+				B5B071B41AA1E1500060B641 /* Makefile */,
+				B5B071B51AA1E1500060B641 /* Member.cpp */,
+				B5B071B61AA1E1500060B641 /* Member.h */,
+				B5B071B71AA1E1500060B641 /* mp1_specifications.pdf */,
+				B5B071B81AA1E1500060B641 /* MP1Node.cpp */,
+				B5B071B91AA1E1500060B641 /* MP1Node.h */,
+				B5B071BA1AA1E1500060B641 /* Params.cpp */,
+				B5B071BB1AA1E1500060B641 /* Params.h */,
+				B5B071BC1AA1E1500060B641 /* Queue.h */,
+				B5B071BD1AA1E1500060B641 /* run.sh */,
+				B5B071BE1AA1E1500060B641 /* stdincludes.h */,
+				B5B071BF1AA1E1500060B641 /* submit.py */,
+				B5B071C01AA1E1500060B641 /* testcases */,
 			);
 			sourceTree = "<group>";
 		};
