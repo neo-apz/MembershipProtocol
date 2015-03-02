@@ -7,7 +7,13 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		B5B1FE6D1AA1F8FA00E66552 /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B5B1FE6C1AA1F8FA00E66552 /* main.cpp */; };
+		B5F628A21AA1FEE80019E06E /* Application.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B5F6288F1AA1FEE80019E06E /* Application.cpp */; };
+		B5F628A31AA1FEE80019E06E /* EmulNet.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B5F628911AA1FEE80019E06E /* EmulNet.cpp */; };
+		B5F628A41AA1FEE80019E06E /* Log.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B5F628941AA1FEE80019E06E /* Log.cpp */; };
+		B5F628A51AA1FEE80019E06E /* Makefile in Sources */ = {isa = PBXBuildFile; fileRef = B5F628961AA1FEE80019E06E /* Makefile */; };
+		B5F628A61AA1FEE80019E06E /* Member.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B5F628971AA1FEE80019E06E /* Member.cpp */; };
+		B5F628A71AA1FEE80019E06E /* MP1Node.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B5F6289A1AA1FEE80019E06E /* MP1Node.cpp */; };
+		B5F628A81AA1FEE80019E06E /* Params.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B5F6289C1AA1FEE80019E06E /* Params.cpp */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -24,7 +30,26 @@
 
 /* Begin PBXFileReference section */
 		B5B1FE691AA1F8F900E66552 /* P2PMembershipProtocol */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = P2PMembershipProtocol; sourceTree = BUILT_PRODUCTS_DIR; };
-		B5B1FE6C1AA1F8FA00E66552 /* main.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = main.cpp; sourceTree = "<group>"; };
+		B5E13D581AA2032700A54DC3 /* testcases */ = {isa = PBXFileReference; lastKnownFileType = folder; path = testcases; sourceTree = "<group>"; };
+		B5F6288F1AA1FEE80019E06E /* Application.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Application.cpp; sourceTree = "<group>"; };
+		B5F628901AA1FEE80019E06E /* Application.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Application.h; sourceTree = "<group>"; };
+		B5F628911AA1FEE80019E06E /* EmulNet.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = EmulNet.cpp; sourceTree = "<group>"; };
+		B5F628921AA1FEE80019E06E /* EmulNet.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = EmulNet.h; sourceTree = "<group>"; };
+		B5F628931AA1FEE80019E06E /* Grader.sh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.sh; path = Grader.sh; sourceTree = "<group>"; };
+		B5F628941AA1FEE80019E06E /* Log.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Log.cpp; sourceTree = "<group>"; };
+		B5F628951AA1FEE80019E06E /* Log.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Log.h; sourceTree = "<group>"; };
+		B5F628961AA1FEE80019E06E /* Makefile */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.make; path = Makefile; sourceTree = "<group>"; };
+		B5F628971AA1FEE80019E06E /* Member.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Member.cpp; sourceTree = "<group>"; };
+		B5F628981AA1FEE80019E06E /* Member.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Member.h; sourceTree = "<group>"; };
+		B5F628991AA1FEE80019E06E /* mp1_specifications.pdf */ = {isa = PBXFileReference; lastKnownFileType = image.pdf; path = mp1_specifications.pdf; sourceTree = "<group>"; };
+		B5F6289A1AA1FEE80019E06E /* MP1Node.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = MP1Node.cpp; sourceTree = "<group>"; };
+		B5F6289B1AA1FEE80019E06E /* MP1Node.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MP1Node.h; sourceTree = "<group>"; };
+		B5F6289C1AA1FEE80019E06E /* Params.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Params.cpp; sourceTree = "<group>"; };
+		B5F6289D1AA1FEE80019E06E /* Params.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Params.h; sourceTree = "<group>"; };
+		B5F6289E1AA1FEE80019E06E /* Queue.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Queue.h; sourceTree = "<group>"; };
+		B5F6289F1AA1FEE80019E06E /* run.sh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.sh; path = run.sh; sourceTree = "<group>"; };
+		B5F628A01AA1FEE80019E06E /* stdincludes.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = stdincludes.h; sourceTree = "<group>"; };
+		B5F628A11AA1FEE80019E06E /* submit.py */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.python; path = submit.py; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -41,7 +66,26 @@
 		B5B1FE601AA1F8F900E66552 = {
 			isa = PBXGroup;
 			children = (
-				B5B1FE6B1AA1F8F900E66552 /* P2PMembershipProtocol */,
+				B5E13D581AA2032700A54DC3 /* testcases */,
+				B5F6288F1AA1FEE80019E06E /* Application.cpp */,
+				B5F628901AA1FEE80019E06E /* Application.h */,
+				B5F628911AA1FEE80019E06E /* EmulNet.cpp */,
+				B5F628921AA1FEE80019E06E /* EmulNet.h */,
+				B5F628931AA1FEE80019E06E /* Grader.sh */,
+				B5F628941AA1FEE80019E06E /* Log.cpp */,
+				B5F628951AA1FEE80019E06E /* Log.h */,
+				B5F628961AA1FEE80019E06E /* Makefile */,
+				B5F628971AA1FEE80019E06E /* Member.cpp */,
+				B5F628981AA1FEE80019E06E /* Member.h */,
+				B5F628991AA1FEE80019E06E /* mp1_specifications.pdf */,
+				B5F6289A1AA1FEE80019E06E /* MP1Node.cpp */,
+				B5F6289B1AA1FEE80019E06E /* MP1Node.h */,
+				B5F6289C1AA1FEE80019E06E /* Params.cpp */,
+				B5F6289D1AA1FEE80019E06E /* Params.h */,
+				B5F6289E1AA1FEE80019E06E /* Queue.h */,
+				B5F6289F1AA1FEE80019E06E /* run.sh */,
+				B5F628A01AA1FEE80019E06E /* stdincludes.h */,
+				B5F628A11AA1FEE80019E06E /* submit.py */,
 				B5B1FE6A1AA1F8F900E66552 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -52,14 +96,6 @@
 				B5B1FE691AA1F8F900E66552 /* P2PMembershipProtocol */,
 			);
 			name = Products;
-			sourceTree = "<group>";
-		};
-		B5B1FE6B1AA1F8F900E66552 /* P2PMembershipProtocol */ = {
-			isa = PBXGroup;
-			children = (
-				B5B1FE6C1AA1F8FA00E66552 /* main.cpp */,
-			);
-			path = P2PMembershipProtocol;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -118,7 +154,13 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				B5B1FE6D1AA1F8FA00E66552 /* main.cpp in Sources */,
+				B5F628A71AA1FEE80019E06E /* MP1Node.cpp in Sources */,
+				B5F628A51AA1FEE80019E06E /* Makefile in Sources */,
+				B5F628A21AA1FEE80019E06E /* Application.cpp in Sources */,
+				B5F628A61AA1FEE80019E06E /* Member.cpp in Sources */,
+				B5F628A41AA1FEE80019E06E /* Log.cpp in Sources */,
+				B5F628A31AA1FEE80019E06E /* EmulNet.cpp in Sources */,
+				B5F628A81AA1FEE80019E06E /* Params.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -232,6 +274,7 @@
 				B5B1FE721AA1F8FA00E66552 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};

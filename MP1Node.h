@@ -56,6 +56,9 @@ private:
 	Member *memberNode;
 	char NULLADDR[6];
 
+    // Here are the handler functions
+    bool handle_joinreq(char* data, int size);
+    
 public:
 	MP1Node(Member *, Params *, EmulNet *, Log *, Address *);
 	Member * getMemberNode() {

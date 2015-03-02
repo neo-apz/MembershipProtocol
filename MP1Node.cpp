@@ -218,6 +218,65 @@ bool MP1Node::recvCallBack(void *env, char *data, int size ) {
 	/*
 	 * Your code goes here
 	 */
+
+    bool ret_value = false;
+    MessageHdr* msg_header = (MessageHdr*) data;
+    
+    MsgTypes msg_type = msg_header->msgType;
+    
+    
+    switch (msg_type) {
+        case JOINREQ:
+            ret_value = handle_joinreq(data+sizeof(MessageHdr), size - sizeof(MessageHdr));
+            break;
+            
+        default:
+            break;
+    }
+    
+    return ret_value;
+}
+
+struct member_list_entry{
+    int id;
+    short port;
+    long heartbeat;
+    long timestamp;
+};
+
+static char* member_to_byte_array(MemberListEntry& node){
+    struct member_list_entry* entry = (member_list_entry*) malloc(sizeof(struct member_list_entry));
+    
+    entry->id = node.getid();
+    entry->port = node.getport();
+    entry->heartbeat = node.getheartbeat();
+    entry->timestamp = node.gettimestamp();
+    
+    return (char*) entry;
+}
+
+bool MP1Node::handle_joinreq(char* data, int size){
+    
+    // identify the requester and add it to the list
+    Address requester;
+    memcpy(requester.addr, data, 6);
+    memberNode->memberList.push_back(
+                                     MemberListEntry(*((int *)requester.addr), *((int *)requester.addr+4), *((long *)data+7), par->getcurrtime()));
+    
+    size_t reply_size = sizeof(MessageHdr) + sizeof(member_list_entry) * (memberNode->memberList.size()+1);
+    MessageHdr *reply_data = (MessageHdr *) malloc(reply_size);
+    int index = sizeof(MessageHdr);
+    reply_data->msgType = JOINREP;
+    
+    // send my memberlist to the requester
+    for (vector<MemberListEntry>::iterator iter = memberNode->memberList.begin(); iter != memberNode->memberList.end(); iter++, index += sizeof(member_list_entry)) {
+        memcpy((char *) reply_data + index, member_to_byte_array(*iter), sizeof(member_list_entry));
+    }
+    
+    emulNet->ENsend(&memberNode->addr, &requester, (char *)reply_data, reply_size);
+    
+    free(reply_data);
+    return true;
 }
 
 /**
