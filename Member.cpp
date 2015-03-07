@@ -40,7 +40,10 @@ bool Address::operator ==(const Address& anotherAddress) {
 /**
  * Constructor
  */
-MemberListEntry::MemberListEntry(int id, short port, long heartbeat, long timestamp): id(id), port(port), heartbeat(heartbeat), timestamp(timestamp) {}
+MemberListEntry::MemberListEntry(int id, short port, long heartbeat, long timestamp): id(id), port(port), heartbeat(heartbeat), timestamp(timestamp)
+{
+//    printf("id=%d, port=%d, hb=%ld, time=%ld \n", id, port, heartbeat, timestamp);
+}
 
 /**
  * Constuctor

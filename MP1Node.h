@@ -31,6 +31,8 @@
 enum MsgTypes{
     JOINREQ,
     JOINREP,
+	PING,
+	FAILNOTIFY,
     DUMMYLASTMSGTYPE
 };
 
@@ -57,7 +59,16 @@ private:
 	char NULLADDR[6];
 
     // Here are the handler functions
-    bool handle_joinreq(char* data, int size);
+    bool handle_joinreq(Address* source, char* data, int size);
+	bool handle_join_reply(Address* source, char *data, int size);
+	bool handle_ping(Address* source, char *data, int size);
+    
+    // Here are extra functions
+    bool update_membership_list(MemberListEntry entry);
+    bool ping_others();
+    
+    MemberListEntry byte_array_to_entry(MemberListEntry& node, char* entry, long timestamp);
+    char* entry_to_byte_array(MemberListEntry& node, char* entry);
     
 public:
 	MP1Node(Member *, Params *, EmulNet *, Log *, Address *);
@@ -76,9 +87,13 @@ public:
 	void nodeLoopOps();
 	int isNullAddress(Address *addr);
 	Address getJoinAddress();
-	void initMemberListTable(Member *memberNode);
+	void initMemberListTable(Member *memberNode, int id, int port);
 	void printAddress(Address *addr);
 	virtual ~MP1Node();
+
+
+	char *member_list_serialize(char *buffer);
+	vector<MemberListEntry> member_list_deserialize(char *buffer, int rows);
 };
 
 #endif /* _MP1NODE_H_ */
