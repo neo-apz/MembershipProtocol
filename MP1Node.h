@@ -59,9 +59,9 @@ private:
 	char NULLADDR[6];
 
     // Here are the handler functions
-    bool handle_joinreq(Address* source, char* data, int size);
-	bool handle_join_reply(Address* source, char *data, int size);
-	bool handle_ping(Address* source, char *data, int size);
+    bool handle_joinreq(char* data, int size);
+	bool handle_join_reply(char *data, int size);
+	bool handle_ping(char *data, int size);
     
     // Here are extra functions
     bool update_membership_list(MemberListEntry entry);
