@@ -20,7 +20,7 @@
  */
 #define TREMOVE 20
 #define TFAIL 5
-
+#define TPING   2
 /*
  * Note: You can change/add any functions in MP1Node.{h,cpp}
  */
@@ -32,7 +32,6 @@ enum MsgTypes{
     JOINREQ,
     JOINREP,
 	PING,
-	FAILNOTIFY,
     DUMMYLASTMSGTYPE
 };
 
@@ -66,6 +65,7 @@ private:
     // Here are extra functions
     bool update_membership_list(MemberListEntry entry);
     bool ping_others();
+    void check_failures();
     
     MemberListEntry byte_array_to_entry(MemberListEntry& node, char* entry, long timestamp);
     char* entry_to_byte_array(MemberListEntry& node, char* entry);

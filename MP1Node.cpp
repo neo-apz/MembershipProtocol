@@ -107,7 +107,7 @@ int MP1Node::initThisNode(Address *joinaddr) {
     // node is up!
 	memberNode->nnb = 0;
 	memberNode->heartbeat = 0;
-	memberNode->pingCounter = TFAIL;
+	memberNode->pingCounter = TPING;
 	memberNode->timeOutCounter = -1;
     initMemberListTable(memberNode, id, port);
 
@@ -304,6 +304,28 @@ bool MP1Node::ping_others(){
     return true;
 }
 
+void MP1Node::check_failures(){
+    Address peer;
+    for (vector<MemberListEntry>::iterator iter = memberNode->memberList.begin()+1; iter != memberNode->memberList.end(); iter++) {
+        
+        if (par->getcurrtime() - iter->gettimestamp() > TREMOVE){ // I should now remove from my table
+            #ifdef DEBUGLOG
+            peer = get_address(*iter);
+            log->logNodeRemove(&memberNode->addr, &peer);
+            #endif
+
+            memberNode->memberList.erase(iter);
+            iter--;
+
+            continue;
+        }
+        
+        if (par->getcurrtime() - iter->gettimestamp() > TFAIL){ // mark this peer as failed
+            iter->setheartbeat(-1); // this means it's failed
+        }
+    }
+}
+
 bool MP1Node::handle_joinreq(char* data, int size){
 
     Address* requester = (Address*) data;
@@ -382,6 +404,13 @@ bool MP1Node::update_membership_list(MemberListEntry entry){
     
     for (vector<MemberListEntry>::iterator iter = memberNode->memberList.begin(); iter != memberNode->memberList.end(); iter++) {
         if (get_address(*iter) == entry_addr) { // already exists
+            if (heartbeat == -1){ // it should be marked as failed
+                iter->setheartbeat(-1);
+                return true;
+            }
+            if (iter->getheartbeat() == -1){ // ignore this
+                return false;
+            }
             if (iter->getheartbeat() < heartbeat){ // actual update
                 iter->settimestamp(par->getcurrtime());
                 iter->setheartbeat(heartbeat);
@@ -390,6 +419,10 @@ bool MP1Node::update_membership_list(MemberListEntry entry){
             // mine is up to date --> no change
             return false;
         }
+    }
+    
+    if (heartbeat == -1){ // I've already removed it from my table.
+        return false;
     }
     
     // It was not in my list --> new entry
@@ -410,12 +443,21 @@ bool MP1Node::update_membership_list(MemberListEntry entry){
  */
 void MP1Node::nodeLoopOps() {
 
-	/*
-	 * Your code goes here
-	 */
-
+    // Check whether it's time to PING others
     
-    ping_others();
+    if (memberNode->pingCounter == 0) { // it's time to ping others
+        memberNode->heartbeat++;
+//        memberNode->myPos->heartbeat++;
+        memberNode->memberList[0].heartbeat++;
+        ping_others();
+        memberNode->pingCounter = TPING;
+    }
+    else{ // wait until it's time to PING
+        memberNode->pingCounter--;
+    }
+    
+    check_failures();
+    
     
     return;
 }
@@ -453,6 +495,7 @@ void MP1Node::initMemberListTable(Member *memberNode, int id, int port) {
 	memberNode->memberList.clear();
     MemberListEntry myself = MemberListEntry(id, port, memberNode->heartbeat, par->getcurrtime());
     memberNode->memberList.push_back(myself);
+//    memberNode->myPos = memberNode->memberList.begin();
 }
 
 /**
