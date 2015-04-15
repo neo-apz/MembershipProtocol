@@ -129,6 +129,7 @@ void MP2Node::clientCreate(string key, string value) {
 	}
 
 	else{
+		// TODO Complete Here!
 	}
 }
 
@@ -145,6 +146,20 @@ void MP2Node::clientRead(string key){
 	/*
 	 * Implement this
 	 */
+
+	Message msg(g_transID, this->memberNode->addr, MessageType::READ, key);
+	vector<Node> replicas = findNodes(key);
+
+	if (replicas.size() == 3) {
+		this->emulNet->ENsend(&this->memberNode->addr, replicas[0].getAddress(), msg.toString());
+		this->emulNet->ENsend(&this->memberNode->addr, replicas[1].getAddress(), msg.toString());
+		this->emulNet->ENsend(&this->memberNode->addr, replicas[2].getAddress(), msg.toString());
+		transactions.emplace(g_transID++, pair<Message , int>(msg, 0));
+	}
+
+	else{
+		// TODO Complete Here!
+	}
 }
 
 /**
@@ -160,6 +175,25 @@ void MP2Node::clientUpdate(string key, string value){
 	/*
 	 * Implement this
 	 */
+
+	Message msg(g_transID, this->memberNode->addr, MessageType::UPDATE, key, value);
+	vector<Node> replicas = findNodes(key);
+
+	if (replicas.size() == 3) {
+		msg.replica = ReplicaType::PRIMARY;
+		this->emulNet->ENsend(&this->memberNode->addr, replicas[0].getAddress(), msg.toString());
+		transactions.emplace(g_transID++, pair<Message , int>(msg, 0));
+
+		msg.replica = ReplicaType::SECONDARY;
+		this->emulNet->ENsend(&this->memberNode->addr, replicas[1].getAddress(), msg.toString());
+
+		msg.replica = ReplicaType::TERTIARY;
+		this->emulNet->ENsend(&this->memberNode->addr, replicas[2].getAddress(), msg.toString());
+	}
+
+	else{
+		// TODO Complete Here!
+	}
 }
 
 /**
@@ -175,6 +209,20 @@ void MP2Node::clientDelete(string key){
 	/*
 	 * Implement this
 	 */
+
+	Message msg(g_transID, this->memberNode->addr, MessageType::DELETE, key);
+	vector<Node> replicas = findNodes(key);
+
+	if (replicas.size() == 3) {
+		this->emulNet->ENsend(&this->memberNode->addr, replicas[0].getAddress(), msg.toString());
+		this->emulNet->ENsend(&this->memberNode->addr, replicas[1].getAddress(), msg.toString());
+		this->emulNet->ENsend(&this->memberNode->addr, replicas[2].getAddress(), msg.toString());
+		transactions.emplace(g_transID++, pair<Message , int>(msg, 0));
+	}
+
+	else{
+		// TODO Complete Here!
+	}
 }
 
 /**
