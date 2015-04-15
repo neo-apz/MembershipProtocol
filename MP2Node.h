@@ -21,7 +21,8 @@
 
 #define REPLICA_COUNT	3
 #define QUORUM_COUNT	2
-
+#define TRANSACTION_TIMEOUT 10
+typedef tuple<Message, int, int> Transaction;
 
 /**
  * CLASS NAME: MP2Node
@@ -61,7 +62,7 @@ private:
 	void handle_readreply_msg(Message msg);
 
 	//
-	map <int, pair<Message , int> > transactions;
+	map <int, Transaction> transactions;
 	int inc_trans_success (int transID);
 	MessageType get_trans_type (int transID);
 	Message get_trans_message (int transID);

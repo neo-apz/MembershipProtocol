@@ -119,7 +119,7 @@ void MP2Node::clientCreate(string key, string value) {
 	if (replicas.size() == 3) {
 		msg.replica = ReplicaType::PRIMARY;
 		this->emulNet->ENsend(&this->memberNode->addr, replicas[0].getAddress(), msg.toString());
-		transactions.emplace(g_transID++, pair<Message , int>(msg, 0));
+		transactions.emplace(g_transID++, Transaction(msg, 0, TRANSACTION_TIMEOUT));
 
 		msg.replica = ReplicaType::SECONDARY;
 		this->emulNet->ENsend(&this->memberNode->addr, replicas[1].getAddress(), msg.toString());
@@ -154,7 +154,7 @@ void MP2Node::clientRead(string key){
 		this->emulNet->ENsend(&this->memberNode->addr, replicas[0].getAddress(), msg.toString());
 		this->emulNet->ENsend(&this->memberNode->addr, replicas[1].getAddress(), msg.toString());
 		this->emulNet->ENsend(&this->memberNode->addr, replicas[2].getAddress(), msg.toString());
-		transactions.emplace(g_transID++, pair<Message , int>(msg, 0));
+		transactions.emplace(g_transID++, Transaction(msg, 0, TRANSACTION_TIMEOUT));
 	}
 
 	else{
@@ -182,7 +182,7 @@ void MP2Node::clientUpdate(string key, string value){
 	if (replicas.size() == 3) {
 		msg.replica = ReplicaType::PRIMARY;
 		this->emulNet->ENsend(&this->memberNode->addr, replicas[0].getAddress(), msg.toString());
-		transactions.emplace(g_transID++, pair<Message , int>(msg, 0));
+		transactions.emplace(g_transID++, Transaction(msg, 0, TRANSACTION_TIMEOUT));
 
 		msg.replica = ReplicaType::SECONDARY;
 		this->emulNet->ENsend(&this->memberNode->addr, replicas[1].getAddress(), msg.toString());
@@ -217,7 +217,7 @@ void MP2Node::clientDelete(string key){
 		this->emulNet->ENsend(&this->memberNode->addr, replicas[0].getAddress(), msg.toString());
 		this->emulNet->ENsend(&this->memberNode->addr, replicas[1].getAddress(), msg.toString());
 		this->emulNet->ENsend(&this->memberNode->addr, replicas[2].getAddress(), msg.toString());
-		transactions.emplace(g_transID++, pair<Message , int>(msg, 0));
+		transactions.emplace(g_transID++, Transaction(msg, 0, TRANSACTION_TIMEOUT));
 	}
 
 	else{
@@ -570,16 +570,16 @@ void MP2Node::stabilizationProtocol() {
 }
 
 int MP2Node::inc_trans_success(int transID) {
-	pair<Message , int> p = transactions.at(transID);
-	p.second++;
-	transactions.at(transID) = p;
-	return p.second;
+	Transaction &transaction = transactions.at(transID);
+	(int)(get<1>(transaction))++;
+//	transactions.at(transID) = transaction;
+	return (int)(get<1>(transaction));
 }
 
 MessageType MP2Node::get_trans_type (int transID) {
-	return ((pair<Message, int>) transactions.at(transID)).first.type;
+	return ((Message)get<0>((Transaction) transactions.at(transID))).type;
 }
 
 Message MP2Node::get_trans_message (int transID) {
-	return ((pair<Message, int>) transactions.at(transID)).first;
+	return ((Message)get<0>((Transaction) transactions.at(transID)));
 }
