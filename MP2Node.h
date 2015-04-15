@@ -19,6 +19,10 @@
 #include "Message.h"
 #include "Queue.h"
 
+#define REPLICA_COUNT	3
+#define QUORUM_COUNT	2
+
+
 /**
  * CLASS NAME: MP2Node
  *
@@ -47,6 +51,20 @@ private:
 	EmulNet * emulNet;
 	// Object of Log
 	Log * log;
+
+	// Message handlers
+	void handle_create_msg(Message msg);
+	void handle_read_msg(Message msg);
+	void handle_update_msg(Message msg);
+	void handle_delete_msg(Message msg);
+	void handle_reply_msg(Message msg);
+	void handle_readreply_msg(Message msg);
+
+	//
+	map <int, pair<Message , int> > transactions;
+	int inc_trans_success (int transID);
+	MessageType get_trans_type (int transID);
+	Message get_trans_message (int transID);
 
 public:
 	MP2Node(Member *memberNode, Params *par, EmulNet *emulNet, Log *log, Address *addressOfMember);

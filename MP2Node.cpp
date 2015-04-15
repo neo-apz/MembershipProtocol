@@ -52,6 +52,7 @@ void MP2Node::updateRing() {
 	// Sort the list based on the hashCode
 	sort(curMemList.begin(), curMemList.end());
 
+	this->ring = curMemList;
 
 	/*
 	 * Step 3: Run the stabilization protocol IF REQUIRED
@@ -111,6 +112,24 @@ void MP2Node::clientCreate(string key, string value) {
 	/*
 	 * Implement this
 	 */
+
+	Message msg(g_transID, this->memberNode->addr, MessageType::CREATE, key, value);
+	vector<Node> replicas = findNodes(key);
+
+	if (replicas.size() == 3) {
+		msg.replica = ReplicaType::PRIMARY;
+		this->emulNet->ENsend(&this->memberNode->addr, replicas[0].getAddress(), msg.toString());
+		transactions.emplace(g_transID++, pair<Message , int>(msg, 0));
+
+		msg.replica = ReplicaType::SECONDARY;
+		this->emulNet->ENsend(&this->memberNode->addr, replicas[1].getAddress(), msg.toString());
+
+		msg.replica = ReplicaType::TERTIARY;
+		this->emulNet->ENsend(&this->memberNode->addr, replicas[2].getAddress(), msg.toString());
+	}
+
+	else{
+	}
 }
 
 /**
@@ -171,6 +190,28 @@ bool MP2Node::createKeyValue(string key, string value, ReplicaType replica) {
 	 * Implement this
 	 */
 	// Insert key, value, replicaType into the hash table
+
+	this->ht->create(key, value);
+	vector<Node> replicas = findNodes(key);
+
+	if (replicas.size() == 3){
+		switch (replica){
+			case ReplicaType::PRIMARY:
+				this->hasMyReplicas.emplace_back(replicas[1]);
+				this->hasMyReplicas.emplace_back(replicas[2]);
+				break;
+			case ReplicaType::SECONDARY:
+
+			case ReplicaType::TERTIARY:
+				this->haveReplicasOf.emplace_back(replicas[0]);
+				break;
+
+		}
+
+		return true;
+	}
+
+	return false;
 }
 
 /**
@@ -247,10 +288,35 @@ void MP2Node::checkMessages() {
 		memberNode->mp2q.pop();
 
 		string message(data, data + size);
-
 		/*
 		 * Handle the message types here
 		 */
+
+		Message msg(message);
+
+		switch (msg.type) {
+			case MessageType::CREATE:
+				handle_create_msg(msg);
+				break;
+			case MessageType::DELETE:
+				handle_delete_msg(msg);
+				break;
+			case MessageType::READ:
+				handle_read_msg(msg);
+				break;
+			case MessageType::UPDATE:
+				handle_update_msg(msg);
+				break;
+			case MessageType::REPLY:
+				handle_reply_msg(msg);
+				break;
+			case MessageType::READREPLY:
+				handle_readreply_msg(msg);
+				break;
+			default:
+				// TODO ERROR
+				break;
+		}
 
 	}
 
@@ -258,6 +324,54 @@ void MP2Node::checkMessages() {
 	 * This function should also ensure all READ and UPDATE operation
 	 * get QUORUM replies
 	 */
+}
+
+// Message Handlers
+
+void MP2Node::handle_create_msg(Message msg) {
+	bool success = createKeyValue(msg.key, msg.value, msg.replica);
+
+	if (success){
+		log->logCreateSuccess(&this->memberNode->addr, false, msg.transID, msg.key, msg.value);
+	}
+	else{
+		log->logCreateFail(&this->memberNode->addr, false, msg.transID, msg.key, msg.value);
+	}
+
+	Message reply(msg.transID, this->memberNode->addr, MessageType::REPLY, success);
+	this->emulNet->ENsend(&this->memberNode->addr, &msg.fromAddr, reply.toString());
+}
+
+void MP2Node::handle_read_msg(Message msg) {
+
+}
+
+void MP2Node::handle_update_msg(Message msg) {
+
+}
+
+void MP2Node::handle_delete_msg(Message msg) {
+
+}
+
+void MP2Node::handle_reply_msg(Message msg) {
+	if (msg.success){
+		if (inc_trans_success(msg.transID) == REPLICA_COUNT){
+			Message original_msg = get_trans_message(msg.transID);
+			switch (get_trans_type(msg.transID)){
+				case MessageType::CREATE:
+					log->logCreateSuccess(&this->memberNode->addr, true, msg.transID, original_msg.key, original_msg.value);
+					break;
+			}
+		}
+	}
+	else{
+		log->logCreateFail(&this->memberNode->addr, true, msg.transID, msg.key, msg.value);
+	}
+}
+
+void MP2Node::handle_readreply_msg(Message msg) {
+
 }
 
 /**
@@ -328,4 +442,19 @@ void MP2Node::stabilizationProtocol() {
 	/*
 	 * Implement this
 	 */
+}
+
+int MP2Node::inc_trans_success(int transID) {
+	pair<Message , int> p = transactions.at(transID);
+	p.second++;
+	transactions.at(transID) = p;
+	return p.second;
+}
+
+MessageType MP2Node::get_trans_type (int transID) {
+	return ((pair<Message, int>) transactions.at(transID)).first.type;
+}
+
+Message MP2Node::get_trans_message (int transID) {
+	return ((pair<Message, int>) transactions.at(transID)).first;
 }
