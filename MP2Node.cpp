@@ -343,15 +343,46 @@ void MP2Node::handle_create_msg(Message msg) {
 }
 
 void MP2Node::handle_read_msg(Message msg) {
+	string value = readKey(msg.key);
+	bool success = (value != "");
 
+	if (success){
+		log->logReadSuccess(&this->memberNode->addr, false, msg.transID, msg.key, value);
+	}
+	else{
+		log->logReadFail(&this->memberNode->addr, false, msg.transID, msg.key);
+	}
+
+	Message reply(msg.transID, this->memberNode->addr, value);
+	this->emulNet->ENsend(&this->memberNode->addr, &msg.fromAddr, reply.toString());
 }
 
 void MP2Node::handle_update_msg(Message msg) {
+	bool success = updateKeyValue(msg.key, msg.value, msg.replica);
 
+	if (success){
+		log->logUpdateSuccess(&this->memberNode->addr, false, msg.transID, msg.key, msg.value);
+	}
+	else{
+		log->logUpdateFail(&this->memberNode->addr, false, msg.transID, msg.key, msg.value);
+	}
+
+	Message reply(msg.transID, this->memberNode->addr, MessageType::REPLY, success);
+	this->emulNet->ENsend(&this->memberNode->addr, &msg.fromAddr, reply.toString());
 }
 
 void MP2Node::handle_delete_msg(Message msg) {
+	bool success = deletekey(msg.key);
 
+	if (success){
+		log->logDeleteSuccess(&this->memberNode->addr, false, msg.transID, msg.key);
+	}
+	else{
+		log->logDeleteFail(&this->memberNode->addr, false, msg.transID, msg.key);
+	}
+
+	Message reply(msg.transID, this->memberNode->addr, MessageType::REPLY, success);
+	this->emulNet->ENsend(&this->memberNode->addr, &msg.fromAddr, reply.toString());
 }
 
 void MP2Node::handle_reply_msg(Message msg) {
