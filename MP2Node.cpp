@@ -355,23 +355,56 @@ void MP2Node::handle_delete_msg(Message msg) {
 }
 
 void MP2Node::handle_reply_msg(Message msg) {
-	if (msg.success){
-		if (inc_trans_success(msg.transID) == REPLICA_COUNT){
-			Message original_msg = get_trans_message(msg.transID);
-			switch (get_trans_type(msg.transID)){
-				case MessageType::CREATE:
+	Message original_msg = get_trans_message(msg.transID);
+	switch (get_trans_type(msg.transID)){
+		case MessageType::CREATE:
+			if (msg.success){
+				if (inc_trans_success(msg.transID) == REPLICA_COUNT){
 					log->logCreateSuccess(&this->memberNode->addr, true, msg.transID, original_msg.key, original_msg.value);
-					break;
+				}
 			}
-		}
+			else{
+				log->logCreateFail(&this->memberNode->addr, true, msg.transID, msg.key, msg.value);
+			}
+			break;
+
+		case MessageType::DELETE:
+			if (msg.success){
+				if (inc_trans_success(msg.transID) == REPLICA_COUNT){
+					log->logDeleteSuccess(&this->memberNode->addr, true, msg.transID, original_msg.key);
+				}
+			}
+			else{
+				log->logDeleteFail(&this->memberNode->addr, true, msg.transID, msg.key);
+			}
+			break;
+
+		case MessageType::UPDATE:
+			if (msg.success){
+				if (inc_trans_success(msg.transID) == QUORUM_COUNT){
+					log->logUpdateSuccess(&this->memberNode->addr, true, msg.transID, original_msg.key, original_msg.value);
+				}
+			}
+			else{
+				log->logUpdateFail(&this->memberNode->addr, true, msg.transID, msg.key, original_msg.value);
+			}
+			break;
 	}
-	else{
-		log->logCreateFail(&this->memberNode->addr, true, msg.transID, msg.key, msg.value);
-	}
+
+
 }
 
 void MP2Node::handle_readreply_msg(Message msg) {
+	Message original_msg = get_trans_message(msg.transID);
 
+	if (msg.value != ""){
+		if (inc_trans_success(msg.transID) == QUORUM_COUNT){
+			log->logReadSuccess(&this->memberNode->addr, true, msg.transID, original_msg.key, msg.value);
+		}
+	}
+	else{
+		log->logReadFail(&this->memberNode->addr, true, msg.transID, msg.key);
+	}
 }
 
 /**
