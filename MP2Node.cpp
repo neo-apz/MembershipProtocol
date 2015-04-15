@@ -275,6 +275,7 @@ string MP2Node::readKey(string key) {
 	 * Implement this
 	 */
 	// Read key from local hash table and return value
+	return this->ht->read(key);
 }
 
 /**
@@ -290,6 +291,7 @@ bool MP2Node::updateKeyValue(string key, string value, ReplicaType replica) {
 	 * Implement this
 	 */
 	// Update key in local hash table and return true or false
+	return this->ht->update(key, value);
 }
 
 /**
@@ -305,6 +307,8 @@ bool MP2Node::deletekey(string key) {
 	 * Implement this
 	 */
 	// Delete the key from the local hash table
+
+	return this->ht->deleteKey(key);
 }
 
 /**
@@ -443,7 +447,9 @@ void MP2Node::handle_reply_msg(Message msg) {
 				}
 			}
 			else{
-				log->logCreateFail(&this->memberNode->addr, true, msg.transID, msg.key, msg.value);
+				if (inc_trans_success(msg.transID) == 1){
+					log->logCreateFail(&this->memberNode->addr, true, msg.transID, msg.key, msg.value);
+				}
 			}
 			break;
 
@@ -454,8 +460,11 @@ void MP2Node::handle_reply_msg(Message msg) {
 				}
 			}
 			else{
-				log->logDeleteFail(&this->memberNode->addr, true, msg.transID, msg.key);
+				if (inc_trans_success(msg.transID) == 1){
+					log->logDeleteFail(&this->memberNode->addr, true, msg.transID, original_msg.key);
+				}
 			}
+
 			break;
 
 		case MessageType::UPDATE:
@@ -465,7 +474,9 @@ void MP2Node::handle_reply_msg(Message msg) {
 				}
 			}
 			else{
-				log->logUpdateFail(&this->memberNode->addr, true, msg.transID, msg.key, original_msg.value);
+				if (inc_trans_success(msg.transID) == 1){
+					log->logUpdateFail(&this->memberNode->addr, true, msg.transID, original_msg.key, original_msg.value);
+				}
 			}
 			break;
 	}
@@ -482,7 +493,9 @@ void MP2Node::handle_readreply_msg(Message msg) {
 		}
 	}
 	else{
-		log->logReadFail(&this->memberNode->addr, true, msg.transID, msg.key);
+		if (inc_trans_success(msg.transID) == 1){
+			log->logReadFail(&this->memberNode->addr, true, msg.transID, msg.key);
+		}
 	}
 }
 
