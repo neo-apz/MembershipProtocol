@@ -51,12 +51,21 @@ void MP2Node::updateRing() {
 	 */
 	// Sort the list based on the hashCode
 	sort(curMemList.begin(), curMemList.end());
+	vector<Node> curNeighbors;
 
-//	vector<Node> curNeighbors = findNeighbors(curMemList);
-//	if (curNeighbors[0].nodeHashCode != haveReplicasOf[0].nodeHashCode) change = true;
-//	else if (curNeighbors[1].nodeHashCode != haveReplicasOf[1].nodeHashCode) change = true;
-//	else if (curNeighbors[0].nodeHashCode != hasMyReplicas[0].nodeHashCode) change = true;
-//	else if (curNeighbors[1].nodeHashCode != hasMyReplicas[1].nodeHashCode) change = true;
+    if (ring.size() == 10){
+        setNeighbors();
+    }
+    
+	if (ring.size() >= 5){
+//		setNeighbors();
+		curNeighbors = findNeighbors(curMemList);
+		if (curNeighbors[0].nodeHashCode != haveReplicasOf[0].nodeHashCode) change = true;
+		else if (curNeighbors[1].nodeHashCode != haveReplicasOf[1].nodeHashCode) change = true;
+		else if (curNeighbors[2].nodeHashCode != hasMyReplicas[0].nodeHashCode) change = true;
+		else if (curNeighbors[3].nodeHashCode != hasMyReplicas[1].nodeHashCode) change = true;
+	}
+
 
 	this->ring = curMemList;
 
@@ -64,8 +73,8 @@ void MP2Node::updateRing() {
 	 * Step 3: Run the stabilization protocol IF REQUIRED
 	 */
 	// Run stabilization protocol if the hash table size is greater than zero and if there has been a changed in the ring
-	if (change)
-		stabilizationProtocol();
+	if (this->ht->currentSize()!=0 && change)
+		stabilizationProtocol(curNeighbors);
 }
 
 /**
@@ -89,7 +98,7 @@ vector<Node> MP2Node::getMembershipList() {
 		memcpy(&addressOfThisMember.addr[4], &port, sizeof(short));
 		curMemList.emplace_back(Node(addressOfThisMember));
 		if (addressOfThisMember == this->memberNode->addr){ // myself
-			myPosition = curMemList.end();
+			myPosition = curMemList.end()-1;
 		}
 	}
 	return curMemList;
@@ -254,18 +263,18 @@ bool MP2Node::createKeyValue(string key, string value, ReplicaType replica) {
 	vector<Node> replicas = findNodes(key);
 
 	if (replicas.size() == 3){
-		switch (replica){
-			case ReplicaType::PRIMARY:
-				this->hasMyReplicas.emplace_back(replicas[1]);
-				this->hasMyReplicas.emplace_back(replicas[2]);
-				break;
-			case ReplicaType::SECONDARY:
-
-			case ReplicaType::TERTIARY:
-				this->haveReplicasOf.emplace_back(replicas[0]);
-				break;
-
-		}
+//		switch (replica){
+//			case ReplicaType::PRIMARY:
+//				this->hasMyReplicas.emplace_back(replicas[1]);
+//				this->hasMyReplicas.emplace_back(replicas[2]);
+//				break;
+//			case ReplicaType::SECONDARY:
+//
+//			case ReplicaType::TERTIARY:
+//				this->haveReplicasOf.emplace_back(replicas[0]);
+//				break;
+//
+//		}
 
 		return true;
 	}
@@ -406,8 +415,10 @@ void MP2Node::handle_create_msg(Message msg) {
 		log->logCreateFail(&this->memberNode->addr, false, msg.transID, msg.key, msg.value);
 	}
 
-	Message reply(msg.transID, this->memberNode->addr, MessageType::REPLY, success);
-	this->emulNet->ENsend(&this->memberNode->addr, &msg.fromAddr, reply.toString());
+	if (msg.transID != STABLIZER_TRANS){
+		Message reply(msg.transID, this->memberNode->addr, MessageType::REPLY, success);
+		this->emulNet->ENsend(&this->memberNode->addr, &msg.fromAddr, reply.toString());
+	}
 }
 
 void MP2Node::handle_read_msg(Message msg) {
@@ -579,10 +590,61 @@ int MP2Node::enqueueWrapper(void *env, char *buff, int size) {
  *				1) Ensures that there are three "CORRECT" replicas of all the keys in spite of failures and joins
  *				Note:- "CORRECT" replicas implies that every key is replicated in its two neighboring nodes in the ring
  */
-void MP2Node::stabilizationProtocol() {
+void MP2Node::stabilizationProtocol(vector<Node> curNeighbors) {
 	/*
 	 * Implement this
 	 */
+
+	if (!isSameNode(hasMyReplicas[1], curNeighbors[3])){
+		// My TERTIARY replica has failed
+
+		for(map<string, string>::iterator kvPair = ht->hashTable.begin(); kvPair != ht->hashTable.end(); kvPair++){
+			 Entry entry(kvPair->second);
+
+			if (entry.replica == ReplicaType::PRIMARY){
+				Message msg(STABLIZER_TRANS, this->memberNode->addr, MessageType::CREATE,
+							kvPair->first, entry.value, ReplicaType::TERTIARY);
+				emulNet->ENsend(&memberNode->addr, &curNeighbors[3].nodeAddress, msg.toString());
+			}
+
+		}
+	}
+	if (!isSameNode(hasMyReplicas[2], curNeighbors[2])){
+		// My SECONDARY replica has failed,
+
+		// TODO check whether this is the previous TERTIARY replica or not!!
+		for(map<string, string>::iterator kvPair = ht->hashTable.begin(); kvPair != ht->hashTable.end(); kvPair++){
+			Entry entry(kvPair->second);
+
+			if (entry.replica == ReplicaType::PRIMARY){
+				Message msg(STABLIZER_TRANS, this->memberNode->addr, MessageType::CREATE,
+							kvPair->first, entry.value, ReplicaType::SECONDARY);
+				emulNet->ENsend(&memberNode->addr, &curNeighbors[2].nodeAddress, msg.toString());
+			}
+
+		}
+	}
+
+	if (!isSameNode(haveReplicasOf[1], curNeighbors[1])){
+		// The PRIMARY replica of which I'm its SECONDARY has failed, so I'm now PRIMARY
+		for(map<string, string>::iterator kvPair = ht->hashTable.begin(); kvPair != ht->hashTable.end(); kvPair++){
+			Entry entry(kvPair->second);
+
+			if (entry.replica == ReplicaType::SECONDARY){
+				entry.replica = ReplicaType::PRIMARY;
+				Message msg(STABLIZER_TRANS, this->memberNode->addr, MessageType::CREATE,
+							kvPair->first, entry.value, ReplicaType::SECONDARY);
+				emulNet->ENsend(&memberNode->addr, &curNeighbors[2].nodeAddress, msg.toString());
+				msg.replica = ReplicaType::TERTIARY;
+				emulNet->ENsend(&memberNode->addr, &curNeighbors[3].nodeAddress, msg.toString());
+			}
+
+		}
+	}
+
+	// update neighbor list to the new version
+	setNeighbors();
+
 }
 
 int MP2Node::inc_trans_success(int transID) {
@@ -601,8 +663,16 @@ Message MP2Node::get_trans_message (int transID) {
 }
 
 vector<Node> MP2Node::findNeighbors(vector<Node> ringOfNodes) {
-	vector<Node>::iterator forwardNode = myPosition;
-	vector<Node>::iterator backwardNode = myPosition;
+    vector<Node>::iterator forwardNode, backwardNode;
+    
+    for (vector<Node>::iterator iter = ringOfNodes.begin(); iter != ringOfNodes.end(); iter++) {
+        if (iter->nodeAddress == memberNode->addr){
+            forwardNode = iter;
+            backwardNode = iter;
+            break;
+        }
+    }
+    
 	vector<Node> neighbors(4);
 
 	if (backwardNode == ringOfNodes.begin()){
@@ -640,4 +710,8 @@ void MP2Node::setNeighbors(){
 	hasMyReplicas.clear();
 	hasMyReplicas.emplace_back(neighbors[2]);
 	hasMyReplicas.emplace_back(neighbors[3]);
+}
+
+bool MP2Node::isSameNode(Node n1, Node n2){
+	return n1.nodeHashCode == n2.nodeHashCode;
 }

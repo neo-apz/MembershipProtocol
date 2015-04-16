@@ -22,6 +22,8 @@
 #define REPLICA_COUNT	3
 #define QUORUM_COUNT	2
 #define TRANSACTION_TIMEOUT 10
+#define STABLIZER_TRANS -1
+
 typedef tuple<Message, int, int> Transaction;
 
 /**
@@ -107,11 +109,13 @@ public:
 	bool deletekey(string key);
 
 	// stabilization protocol - handle multiple failures
-	void stabilizationProtocol();
+	void stabilizationProtocol(vector<Node> curNeighbors);
 
 	~MP2Node();
 
 	void setNeighbors();
+
+	bool isSameNode(Node n1, Node n2);
 };
 
 #endif /* MP2NODE_H_ */
