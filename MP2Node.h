@@ -54,6 +54,8 @@ private:
 	EmulNet * emulNet;
 	// Object of Log
 	Log * log;
+    
+    bool isCordinator = false;
 
 	vector<Node>::iterator myPosition;
 
@@ -68,8 +70,13 @@ private:
 	//
 	map <int, Transaction> transactions;
 	int inc_trans_success (int transID);
+    int dec_trans_timeout (int transID);
+    void invalidate_trans (int transID);
 	MessageType get_trans_type (int transID);
 	Message get_trans_message (int transID);
+    void check_for_timeout();
+    
+    bool isSameNode(Node n1, Node n2);
 
 public:
 	MP2Node(Member *memberNode, Params *par, EmulNet *emulNet, Log *log, Address *addressOfMember);
@@ -82,6 +89,7 @@ public:
 	vector<Node> getMembershipList();
 	size_t hashFunction(string key);
 	vector<Node> findNeighbors(vector<Node> ringOfNodes);
+    void setNeighbors();
 
 	// client side CRUD APIs
 	void clientCreate(string key, string value);
@@ -112,10 +120,6 @@ public:
 	void stabilizationProtocol(vector<Node> curNeighbors);
 
 	~MP2Node();
-
-	void setNeighbors();
-
-	bool isSameNode(Node n1, Node n2);
 };
 
 #endif /* MP2NODE_H_ */

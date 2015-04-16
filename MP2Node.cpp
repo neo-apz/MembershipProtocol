@@ -75,6 +75,10 @@ void MP2Node::updateRing() {
 	// Run stabilization protocol if the hash table size is greater than zero and if there has been a changed in the ring
 	if (this->ht->currentSize()!=0 && change)
 		stabilizationProtocol(curNeighbors);
+    
+
+    if (isCordinator)
+        check_for_timeout();
 }
 
 /**
@@ -132,6 +136,8 @@ void MP2Node::clientCreate(string key, string value) {
 	/*
 	 * Implement this
 	 */
+    isCordinator = true;
+    
 
 	Message msg(g_transID, this->memberNode->addr, MessageType::CREATE, key, value);
 	vector<Node> replicas = findNodes(key);
@@ -167,6 +173,8 @@ void MP2Node::clientRead(string key){
 	 * Implement this
 	 */
 
+    isCordinator = true;
+    
 	Message msg(g_transID, this->memberNode->addr, MessageType::READ, key);
 	vector<Node> replicas = findNodes(key);
 
@@ -195,6 +203,8 @@ void MP2Node::clientUpdate(string key, string value){
 	/*
 	 * Implement this
 	 */
+
+    isCordinator = true;
 
 	Message msg(g_transID, this->memberNode->addr, MessageType::UPDATE, key, value);
 	vector<Node> replicas = findNodes(key);
@@ -229,6 +239,8 @@ void MP2Node::clientDelete(string key){
 	/*
 	 * Implement this
 	 */
+
+    isCordinator = true;
 
 	Message msg(g_transID, this->memberNode->addr, MessageType::DELETE, key);
 	vector<Node> replicas = findNodes(key);
@@ -471,11 +483,13 @@ void MP2Node::handle_reply_msg(Message msg) {
 			if (msg.success){
 				if (inc_trans_success(msg.transID) == REPLICA_COUNT){
 					log->logCreateSuccess(&this->memberNode->addr, true, msg.transID, original_msg.key, original_msg.value);
+                    invalidate_trans(msg.transID);
 				}
 			}
 			else{
 				if (inc_trans_success(msg.transID) == 1){
 					log->logCreateFail(&this->memberNode->addr, true, msg.transID, msg.key, msg.value);
+                    invalidate_trans(msg.transID);
 				}
 			}
 			break;
@@ -484,11 +498,13 @@ void MP2Node::handle_reply_msg(Message msg) {
 			if (msg.success){
 				if (inc_trans_success(msg.transID) == REPLICA_COUNT){
 					log->logDeleteSuccess(&this->memberNode->addr, true, msg.transID, original_msg.key);
+                    invalidate_trans(msg.transID);
 				}
 			}
 			else{
 				if (inc_trans_success(msg.transID) == 1){
 					log->logDeleteFail(&this->memberNode->addr, true, msg.transID, original_msg.key);
+                    invalidate_trans(msg.transID);
 				}
 			}
 
@@ -498,11 +514,13 @@ void MP2Node::handle_reply_msg(Message msg) {
 			if (msg.success){
 				if (inc_trans_success(msg.transID) == QUORUM_COUNT){
 					log->logUpdateSuccess(&this->memberNode->addr, true, msg.transID, original_msg.key, original_msg.value);
-				}
+                    invalidate_trans(msg.transID);
+                }
 			}
 			else{
 				if (inc_trans_success(msg.transID) == 1){
 					log->logUpdateFail(&this->memberNode->addr, true, msg.transID, original_msg.key, original_msg.value);
+                    invalidate_trans(msg.transID);
 				}
 			}
 			break;
@@ -517,11 +535,13 @@ void MP2Node::handle_readreply_msg(Message msg) {
 	if (msg.value != ""){
 		if (inc_trans_success(msg.transID) == QUORUM_COUNT){
 			log->logReadSuccess(&this->memberNode->addr, true, msg.transID, original_msg.key, msg.value);
+            invalidate_trans(msg.transID);
 		}
 	}
 	else{
 		if (inc_trans_success(msg.transID) == 1){
 			log->logReadFail(&this->memberNode->addr, true, msg.transID, msg.key);
+            invalidate_trans(msg.transID);
 		}
 	}
 }
@@ -649,9 +669,19 @@ void MP2Node::stabilizationProtocol(vector<Node> curNeighbors) {
 
 int MP2Node::inc_trans_success(int transID) {
 	Transaction &transaction = transactions.at(transID);
-	(int)(get<1>(transaction))++;
-//	transactions.at(transID) = transaction;
+	(get<1>(transaction))++;
 	return (int)(get<1>(transaction));
+}
+
+int MP2Node::dec_trans_timeout(int transID) {
+    Transaction &transaction = transactions.at(transID);
+    (get<2>(transaction))--;
+    return (int)(get<2>(transaction));
+}
+
+void MP2Node::invalidate_trans(int transID) {
+    Transaction &transaction = transactions.at(transID);
+    get<2>(transaction) = -1;
 }
 
 MessageType MP2Node::get_trans_type (int transID) {
@@ -714,4 +744,25 @@ void MP2Node::setNeighbors(){
 
 bool MP2Node::isSameNode(Node n1, Node n2){
 	return n1.nodeHashCode == n2.nodeHashCode;
+}
+
+void MP2Node::check_for_timeout(){
+    for (map<int, Transaction>::iterator trans_pair = transactions.begin(); trans_pair != transactions.end(); trans_pair++) {
+        Message msg = get_trans_message(trans_pair->first);
+        
+        if (dec_trans_timeout(trans_pair->first) == 0){
+            switch (get_trans_type(trans_pair->first)) {
+                case READ:
+                    log->logReadFail(&this->memberNode->addr, true, msg.transID, msg.key);
+                    break;
+                case UPDATE:
+                    log->logUpdateFail(&this->memberNode->addr, true, msg.transID, msg.key, msg.value);
+                    break;
+                default:
+                    break;
+            };
+            
+            
+        }
+    }
 }
