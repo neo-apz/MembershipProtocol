@@ -52,12 +52,20 @@ void MP2Node::updateRing() {
 	// Sort the list based on the hashCode
 	sort(curMemList.begin(), curMemList.end());
 
+//	vector<Node> curNeighbors = findNeighbors(curMemList);
+//	if (curNeighbors[0].nodeHashCode != haveReplicasOf[0].nodeHashCode) change = true;
+//	else if (curNeighbors[1].nodeHashCode != haveReplicasOf[1].nodeHashCode) change = true;
+//	else if (curNeighbors[0].nodeHashCode != hasMyReplicas[0].nodeHashCode) change = true;
+//	else if (curNeighbors[1].nodeHashCode != hasMyReplicas[1].nodeHashCode) change = true;
+
 	this->ring = curMemList;
 
 	/*
 	 * Step 3: Run the stabilization protocol IF REQUIRED
 	 */
 	// Run stabilization protocol if the hash table size is greater than zero and if there has been a changed in the ring
+	if (change)
+		stabilizationProtocol();
 }
 
 /**
@@ -80,6 +88,9 @@ vector<Node> MP2Node::getMembershipList() {
 		memcpy(&addressOfThisMember.addr[0], &id, sizeof(int));
 		memcpy(&addressOfThisMember.addr[4], &port, sizeof(short));
 		curMemList.emplace_back(Node(addressOfThisMember));
+		if (addressOfThisMember == this->memberNode->addr){ // myself
+			myPosition = curMemList.end();
+		}
 	}
 	return curMemList;
 }
@@ -239,7 +250,7 @@ bool MP2Node::createKeyValue(string key, string value, ReplicaType replica) {
 	 */
 	// Insert key, value, replicaType into the hash table
 
-	this->ht->create(key, value);
+	this->ht->create(key, Entry(value, par->getcurrtime(), replica).convertToString());
 	vector<Node> replicas = findNodes(key);
 
 	if (replicas.size() == 3){
@@ -275,7 +286,12 @@ string MP2Node::readKey(string key) {
 	 * Implement this
 	 */
 	// Read key from local hash table and return value
-	return this->ht->read(key);
+	string entryStr = this->ht->read(key);
+	if (!entryStr.empty()){
+		return Entry(entryStr).value;
+	}
+
+	return entryStr;
 }
 
 /**
@@ -291,7 +307,7 @@ bool MP2Node::updateKeyValue(string key, string value, ReplicaType replica) {
 	 * Implement this
 	 */
 	// Update key in local hash table and return true or false
-	return this->ht->update(key, value);
+	return this->ht->update(key, Entry(value, par->getcurrtime(), replica).convertToString());
 }
 
 /**
@@ -582,4 +598,46 @@ MessageType MP2Node::get_trans_type (int transID) {
 
 Message MP2Node::get_trans_message (int transID) {
 	return ((Message)get<0>((Transaction) transactions.at(transID)));
+}
+
+vector<Node> MP2Node::findNeighbors(vector<Node> ringOfNodes) {
+	vector<Node>::iterator forwardNode = myPosition;
+	vector<Node>::iterator backwardNode = myPosition;
+	vector<Node> neighbors(4);
+
+	if (backwardNode == ringOfNodes.begin()){
+		backwardNode = ringOfNodes.end();
+	}
+	backwardNode--;
+	neighbors[1] = *backwardNode;
+
+	if (backwardNode == ringOfNodes.begin()){
+		backwardNode = ringOfNodes.end();
+	}
+	backwardNode--;
+	neighbors[0] = *backwardNode;
+
+	forwardNode++;
+	if (forwardNode == ringOfNodes.end())
+		forwardNode = ringOfNodes.begin();
+
+	neighbors[2] = *forwardNode;
+	forwardNode++;
+	if (forwardNode == ringOfNodes.end())
+		forwardNode = ringOfNodes.begin();
+
+	neighbors[3] = *forwardNode;
+
+	return neighbors;
+}
+
+void MP2Node::setNeighbors(){
+	vector<Node> neighbors = findNeighbors(this->ring);
+	haveReplicasOf.clear();
+	haveReplicasOf.emplace_back(neighbors[0]);
+	haveReplicasOf.emplace_back(neighbors[1]);
+
+	hasMyReplicas.clear();
+	hasMyReplicas.emplace_back(neighbors[2]);
+	hasMyReplicas.emplace_back(neighbors[3]);
 }

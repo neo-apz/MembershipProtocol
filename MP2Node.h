@@ -53,6 +53,8 @@ private:
 	// Object of Log
 	Log * log;
 
+	vector<Node>::iterator myPosition;
+
 	// Message handlers
 	void handle_create_msg(Message msg);
 	void handle_read_msg(Message msg);
@@ -77,7 +79,7 @@ public:
 	void updateRing();
 	vector<Node> getMembershipList();
 	size_t hashFunction(string key);
-	void findNeighbors();
+	vector<Node> findNeighbors(vector<Node> ringOfNodes);
 
 	// client side CRUD APIs
 	void clientCreate(string key, string value);
@@ -108,6 +110,8 @@ public:
 	void stabilizationProtocol();
 
 	~MP2Node();
+
+	void setNeighbors();
 };
 
 #endif /* MP2NODE_H_ */
